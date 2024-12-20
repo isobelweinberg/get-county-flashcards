@@ -1,0 +1,5 @@
+X get counties list
+- load wikipedia page for each county
+- get image and save
+- format as anki cards (?how)
+- import to anki 
