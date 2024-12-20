@@ -75,13 +75,20 @@ counties = [
 # soup = BeautifulSoup(page.content, "html.parser")
 # print(soup)
 
+#Get URL for the wikipedia article for each county
 updated_counties = [county.replace(" ", "_") if " " in county else county for county in counties]
 urls = [f"https://en.wikipedia.org/wiki/{county}" for county in updated_counties]
+# Slightly ugly cheat for the West Midlands
+for i, url in enumerate(urls):
+    if updated_counties[i] != "West_Midlands":
+        continue
+    else:
+        urls[i] += "_(region)"
 
 # Get image URLs from wikipedia
 img_urls = {}
 
-for i, url in enumerate(urls):
+for i, url in enumerate(urls):   
     page = requests.get(url)
     soup = BeautifulSoup(page.content, "html.parser")
     table = soup.find("table", class_="infobox ib-settlement vcard")
@@ -100,6 +107,8 @@ for i, url in enumerate(urls):
                 print(f"No image found in relevant cell at {url}")
         else:
             print(f"Only {len(specific_cells)} cells found at {url}")
+    else:
+        print(f"No table found at {url}")
 
 # print(img_urls)
 
@@ -108,30 +117,14 @@ for county, image_url in img_urls.items():
     if not image_url:
         print(f"No image URL found for {county}")
         continue
+    output_path = os.path.join(save_folder, f"{county}.png")
+    if os.path.isfile(output_path):
+        print(f"Image for {county} already exists at {output_path}. Skipping. Please delete this image if you would like an updated one.")
+        continue
     response = requests.get(image_url)
     if response.status_code == 200:
-        output_path = os.path.join(save_folder, f"{county}.png")
         with open(output_path, "wb") as file:
             file.write(response.content)
         print(f"Image for {county} has been saved successfully at {output_path}!")
     else:
         print(f"Failed to retrieve image for {county}. Status code: {response.status_code}")
-    break
-
-        # rows = table.find_all("tr")
-        # if len(rows) > 1:
-        #     second_row = rows[1]
-        #     cells = second_row.find_all("td")
-        #     if cells:
-        #         img_tag = cells[0].find("img")
-        #         if img_tag and "src" in img_tag.attrs:
-        #             img_url = img_tag["src"]
-        #             print(img_url)
-        #         else: 
-        #             print(f"No image found in first cell of second row at {url}")
-        #     else:
-        #         print(f"No cells found in second row at {url}")
-        # else:
-        #    print(f"No second row found at {url}")
-  
-            
