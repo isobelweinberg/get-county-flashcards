@@ -4,6 +4,7 @@ import argparse
 import os
 from PIL import Image
 from io import BytesIO
+from get_images_funcs import get_image_urls_via_scraping, get_image_urls_via_api
 
 # Set up script
 parser = argparse.ArgumentParser(description="Save county images from Wikipedia")
@@ -12,6 +13,12 @@ parser.add_argument(
     type=str,
     default="data",
     help="Path to the folder where images will be saved, relative to directory where script is located (default: data)"
+)
+parser.add_argument(
+    "--use-api",
+    type=bool,
+    default=False,
+    help="Use the Wikipedia API to get image URLs (default: False i.e. use scraping)"
 )
 
 # Create a data folder if none exists for images
@@ -87,64 +94,46 @@ for i, url in enumerate(urls):
     else:
         urls[i] += "_(county)"
 
-# Get image URLs from wikipedia
-img_urls = {}
-
-for i, url in enumerate(urls):   
-    page = requests.get(url)
-    soup = BeautifulSoup(page.content, "html.parser")
-    table = soup.find("table", class_="infobox ib-settlement vcard")
-    img_urls[updated_counties[i]] = None
-    if table:
-        infobox_cells = table.find_all("td", class_="infobox-full-data")
-        if len(infobox_cells) > 1:
-            j = 1 # start at 1 to skip the first cell which doesn't contain the map
-            while j < len(infobox_cells):
-                img_tag = infobox_cells[j].find("img")
-                if img_tag and "src" in img_tag.attrs and ('map' in img_tag["src"].lower() or '.svg.png' in img_tag["src"].lower()):  # Greater London doesn't have map in its map URL
-                    img_url = img_tag["src"]
-                    if not img_url.startswith("http"):
-                        img_url = "https:" + img_url
-                    img_urls[updated_counties[i]] = img_url.replace("250", "500")
-                    break
-                j += 1
-            if img_urls[updated_counties[i]] is None:
-                print(f"No image found for {updated_counties[i]}")   
-        else:
-            print(f"Only {len(infobox_cells)} cells found at {url}")
-    else:
-        print(f"No table found at {url}")
-
 # print(img_urls)
 
-# Scrape images and save them
-for county, image_url in img_urls.items():
-    if not image_url:
-        print(f"No image URL found for {county}")
-        continue
-    output_path = os.path.join(save_folder, f"{county}.jpg")
-    if os.path.isfile(output_path):
-        print(f"Image for {county} already exists at {output_path}. Skipping. Please delete this image if you would like an updated one.")
-        continue
-    response = requests.get(image_url)
-    if response.status_code == 200:
-        try:
-            image = Image.open(BytesIO(response.content))
-            if image.mode == 'RGBA':
-                background = Image.new('RGB', image.size, (255, 255, 255))  # White background
-                background.paste(image, mask=image.split()[3])  # Paste the PNG image onto the white background
-                image = background
-            image.convert("RGB").save(output_path, "JPEG")
-            print(f"Image for {county} has been saved successfully at {output_path}")
-        except Exception as e:
-            print(f"Failed to process image for {county}: {e}")
-    else:
-        print(f"Failed to retrieve image for {county}. Status code: {response.status_code}")
+if not args.use_api:
+    img_urls = get_image_urls_via_scraping(urls, updated_counties)
 
+    # Scrape images and save them
+    for county, image_url in img_urls.items():
+        if not image_url:
+            print(f"No image URL found for {county}")
+            continue
+        output_path = os.path.join(save_folder, f"{county}.jpg")
+        if os.path.isfile(output_path):
+            print(f"Image for {county} already exists at {output_path}. Skipping. Please delete this image if you would like an updated one.")
+            continue
+        response = requests.get(image_url)
+        if response.status_code == 200:
+            try:
+                image = Image.open(BytesIO(response.content))
+                if image.mode == 'RGBA':
+                    background = Image.new('RGB', image.size, (255, 255, 255))  # White background
+                    background.paste(image, mask=image.split()[3])  # Paste the PNG image onto the white background
+                    image = background
+                image.convert("RGB").save(output_path, "JPEG")
+                print(f"Image for {county} has been saved successfully at {output_path}")
+            except Exception as e:
+                print(f"Failed to process image for {county}: {e}")
+        else:
+            print(f"Failed to retrieve image for {county}. Status code: {response.status_code}")
 
+elif args.use_api:
+    # Decided to leave this code here. Testing out a new way to get the images via the API rather than scraping. 
+    # The reason for doing this was because was getting quite a few 403 errors when trying to scrape the images
+    # However, still needs quite a lot more work to get only the right images, so decided to continue with the web scraping and add management of the 403s
 
-    #     with open(output_path, "wb") as file:
-    #         file.write(response.content)
-    #     print(f"Image for {county} has been saved successfully at {output_path}!")
-    # else:
-    #     print(f"Failed to retrieve image for {county}. Status code: {response.status_code}")
+    for i, county in enumerate(updated_counties):
+        print(county)
+        image_filenames, image_urls = get_image_urls_via_api(county)
+        for j in image_filenames:
+            # print(counties[i] + ' UK')
+            if counties[i] + ' UK' in j:
+                print(j)
+            
+        
