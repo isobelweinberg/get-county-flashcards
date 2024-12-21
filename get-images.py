@@ -4,6 +4,7 @@ import argparse
 import os
 from PIL import Image
 from io import BytesIO
+import time
 from get_images_funcs import get_image_urls_via_scraping, get_image_urls_via_api
 
 # Set up script
@@ -108,7 +109,20 @@ if not args.use_api:
         if os.path.isfile(output_path):
             print(f"Image for {county} already exists at {output_path}. Skipping. Please delete this image if you would like an updated one.")
             continue
-        response = requests.get(image_url)
+
+        # Tried repeating requests when got a 403 but this wasn't successful
+        # attempts = 0
+        # while attempts <= 10:
+        #     attempts += 1
+        #     response = requests.get(image_url)
+        #     if response.status_code == 403:
+        #         print(f"403 error for {county}. Trying again. Attempt {attempts}")
+        #         time.sleep(2)
+        #     else:
+        #         break
+
+        headers = {"User-Agent": "AnkiImagesBot/0.0 (https://github.com/isobelweinberg)"}
+        response = requests.get(image_url, headers=headers)
         if response.status_code == 200:
             try:
                 image = Image.open(BytesIO(response.content))
