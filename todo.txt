@@ -1,6 +1,7 @@
 X get counties list
 X load wikipedia page for each county
 X get image and save
-- format as anki cards (?how)
-- import to anki 
+X format as anki cards (?how)
+X import to anki 
+- flags instead of maps for some counties
 - add in robustness to request response

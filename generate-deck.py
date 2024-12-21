@@ -13,7 +13,7 @@ parser.add_argument(
 parser.add_argument(
     "--output-file",
     type=str,
-    default="county_deck2.apkg",
+    default="data/county_deck.apkg",
     help="Name of the output file for the Anki deck (default: data/county_deck.apkg)"
 )
 args = parser.parse_args()
@@ -62,8 +62,8 @@ for image_file, county_name in counties:
 
 # Create package
 package = genanki.Package(county_deck)
-print([os.path.abspath(os.path.join(img_folder, img)) for img in img_files])
-package.media_files = [os.path.abspath(os.path.join(img_folder, img)) for img in img_files]
+# print([os.path.join(img_folder, img) for img in img_files])
+package.media_files = [os.path.join(img_folder, img) for img in img_files]
 
 # Save package
 package.write_to_file(output_file)
