@@ -85,7 +85,7 @@ for i, url in enumerate(urls):
     if updated_counties[i] != "West_Midlands":
         continue
     else:
-        urls[i] += "_(region)"
+        urls[i] += "_(county)"
 
 # Get image URLs from wikipedia
 img_urls = {}
@@ -96,19 +96,22 @@ for i, url in enumerate(urls):
     table = soup.find("table", class_="infobox ib-settlement vcard")
     img_urls[updated_counties[i]] = None
     if table:
-        specific_cells = table.find_all("td", class_="infobox-full-data")
-        if len(specific_cells) > 1:
-            cell_with_img = specific_cells[1]
-            img_tag = cell_with_img.find("img")
-            if not img_tag:
-                cell_with_img = specific_cells[2] if len(specific_cells) > 2 else None
-                img_tag = cell_with_img.find("img") if cell_with_img else None
-            if img_tag and "src" in img_tag.attrs:
-                img_urls[updated_counties[i]] = 'https:' + img_tag["src"].replace("250", "500")
-            else: 
-                print(f"No image found in relevant cell at {url}")
+        infobox_cells = table.find_all("td", class_="infobox-full-data")
+        if len(infobox_cells) > 1:
+            j = 1 # start at 1 to skip the first cell which doesn't contain the map
+            while j < len(infobox_cells):
+                img_tag = infobox_cells[j].find("img")
+                if img_tag and "src" in img_tag.attrs and ('map' in img_tag["src"].lower() or '.svg.png' in img_tag["src"].lower()):  # Greater London doesn't have map in its map URL
+                    img_url = img_tag["src"]
+                    if not img_url.startswith("http"):
+                        img_url = "https:" + img_url
+                    img_urls[updated_counties[i]] = img_url.replace("250", "500")
+                    break
+                j += 1
+            if img_urls[updated_counties[i]] is None:
+                print(f"No image found for {updated_counties[i]}")   
         else:
-            print(f"Only {len(specific_cells)} cells found at {url}")
+            print(f"Only {len(infobox_cells)} cells found at {url}")
     else:
         print(f"No table found at {url}")
 
