@@ -5,4 +5,3 @@ X format as anki cards (?how)
 X import to anki 
 X flags instead of maps for some counties
 X add in robustness to request response
-- Bristol
