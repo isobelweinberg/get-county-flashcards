@@ -45,7 +45,7 @@ county_model = genanki.Model(
 # Create the deck
 county_deck = genanki.Deck(
     DECK_ID,
-    "English Counties",
+    "Counties of England",
 )
 
 # # Add flashcards to the deck

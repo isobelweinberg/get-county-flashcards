@@ -125,6 +125,7 @@ if not args.use_api:
         response = requests.get(image_url, headers=headers)
         if response.status_code == 200:
             try:
+                # Convert to JPEG
                 image = Image.open(BytesIO(response.content))
                 if image.mode == 'RGBA':
                     background = Image.new('RGB', image.size, (255, 255, 255))  # White background

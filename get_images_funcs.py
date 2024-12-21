@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 import requests
+import re
 
 def get_image_urls_via_scraping(urls: list, updated_counties: list) -> dict:
     # Get image URLs from wikipedia
@@ -20,7 +21,8 @@ def get_image_urls_via_scraping(urls: list, updated_counties: list) -> dict:
                         img_url = img_tag["src"]
                         if not img_url.startswith("http"):
                             img_url = "https:" + img_url
-                        img_urls[updated_counties[i]] = img_url.replace("250", "500")
+                        # img_urls[updated_counties[i]] = img_url.replace("250", "500")
+                        img_urls[updated_counties[i]] = re.sub(r"(200|250)", "500", img_url)
                         break
                     j += 1
                 if img_urls[updated_counties[i]] is None:
