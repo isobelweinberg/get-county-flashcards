@@ -2,6 +2,8 @@ import requests
 from bs4 import BeautifulSoup
 import argparse
 import os
+from PIL import Image
+from io import BytesIO
 
 # Set up script
 parser = argparse.ArgumentParser(description="Save county images from Wikipedia")
@@ -117,14 +119,29 @@ for county, image_url in img_urls.items():
     if not image_url:
         print(f"No image URL found for {county}")
         continue
-    output_path = os.path.join(save_folder, f"{county}.png")
+    output_path = os.path.join(save_folder, f"{county}.jpg")
     if os.path.isfile(output_path):
         print(f"Image for {county} already exists at {output_path}. Skipping. Please delete this image if you would like an updated one.")
         continue
     response = requests.get(image_url)
     if response.status_code == 200:
-        with open(output_path, "wb") as file:
-            file.write(response.content)
-        print(f"Image for {county} has been saved successfully at {output_path}!")
+        try:
+            image = Image.open(BytesIO(response.content))
+            if image.mode == 'RGBA':
+                background = Image.new('RGB', image.size, (255, 255, 255))  # White background
+                background.paste(image, mask=image.split()[3])  # Paste the PNG image onto the white background
+                image = background
+            image.convert("RGB").save(output_path, "JPEG")
+            print(f"Image for {county} has been saved successfully at {output_path}")
+        except Exception as e:
+            print(f"Failed to process image for {county}: {e}")
     else:
         print(f"Failed to retrieve image for {county}. Status code: {response.status_code}")
+
+
+
+    #     with open(output_path, "wb") as file:
+    #         file.write(response.content)
+    #     print(f"Image for {county} has been saved successfully at {output_path}!")
+    # else:
+    #     print(f"Failed to retrieve image for {county}. Status code: {response.status_code}")

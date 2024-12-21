@@ -1,3 +1,6 @@
 myvenv
 data
 data2
+test.ipynb
+*.apkg
+__pycache__
