@@ -122,6 +122,11 @@ if not args.use_api:
         #         break
 
         headers = {"User-Agent": "AnkiImagesBot/0.0 (https://github.com/isobelweinberg)"}
+        session = requests.Session()
+        session.headers.update(headers)
+
+        response = session.get(url)
+
         response = requests.get(image_url, headers=headers)
         if response.status_code == 200:
             try:
@@ -137,6 +142,7 @@ if not args.use_api:
                 print(f"Failed to process image for {county}: {e}")
         else:
             print(f"Failed to retrieve image for {county}. Status code: {response.status_code}")
+        time.sleep(2)
 
 elif args.use_api:
     # Decided to leave this code here. Testing out a new way to get the images via the API rather than scraping. 
