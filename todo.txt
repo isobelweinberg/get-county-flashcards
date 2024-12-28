@@ -7,4 +7,4 @@ X flags instead of maps for some counties
 X add in robustness to request response
 X add sessions?
 X fix city of london
-- check img sizes
+X check img sizes
