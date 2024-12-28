@@ -17,7 +17,9 @@ def get_image_urls_via_scraping(urls: list, updated_counties: list) -> dict:
                 j = 1 # start at 1 to skip the first cell which doesn't contain the map
                 while j < len(infobox_cells):
                     img_tag = infobox_cells[j].find("img")
-                    if img_tag and "src" in img_tag.attrs and ('map' in img_tag["src"].lower() or (updated_counties[i] == 'Greater_London' and '.svg.png' in img_tag["src"].lower())):  # Greater London doesn't have map in its map URL
+                    if img_tag and "src" in img_tag.attrs and ('map' in img_tag["src"].lower() 
+                                                               or (updated_counties[i] == 'Greater_London' and '.svg.png' in img_tag["src"].lower())
+                                                                or (updated_counties[i] == 'City_of_London' and 'location' in img_tag["alt"].lower())):  # Greater London doesn't have map in its map URL
                         img_url = img_tag["src"]
                         if not img_url.startswith("http"):
                             img_url = "https:" + img_url

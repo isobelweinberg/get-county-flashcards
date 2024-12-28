@@ -124,10 +124,9 @@ if not args.use_api:
         headers = {"User-Agent": "AnkiImagesBot/0.0 (https://github.com/isobelweinberg)"}
         session = requests.Session()
         session.headers.update(headers)
-
         response = session.get(image_url)
         # response = requests.get(image_url, headers=headers)
-        
+
         if response.status_code == 200:
             try:
                 # Convert to JPEG
@@ -142,7 +141,10 @@ if not args.use_api:
                 print(f"Failed to process image for {county}: {e}")
         else:
             print(f"Failed to retrieve image for {county}. Status code: {response.status_code}")
-        time.sleep(2)
+            # print(image_url)
+            # print("Response Headers:", response.headers)
+            # print("Response Body:", response.text)
+        # time.sleep(2)
 
 elif args.use_api:
     # Decided to leave this code here. Testing out a new way to get the images via the API rather than scraping. 

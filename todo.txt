@@ -6,4 +6,5 @@ X import to anki
 X flags instead of maps for some counties
 X add in robustness to request response
 X add sessions?
-- scrape html via API if sessions don't fix 403s
+X fix city of london
+- check img sizes
