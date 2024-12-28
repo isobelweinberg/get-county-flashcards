@@ -125,9 +125,9 @@ if not args.use_api:
         session = requests.Session()
         session.headers.update(headers)
 
-        response = session.get(url)
-
-        response = requests.get(image_url, headers=headers)
+        response = session.get(image_url)
+        # response = requests.get(image_url, headers=headers)
+        
         if response.status_code == 200:
             try:
                 # Convert to JPEG
